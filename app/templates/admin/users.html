@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách người dùng</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Số task</th>
+                        <th>Tasks trễ hạn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <img src="{{ user.avatar }}" alt="Avatar" 
+                                 class="rounded-circle" 
+                                 style="width: 32px; height: 32px; object-fit: cover;">
+                        </td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.is_admin %}bg-danger{% else %}bg-primary{% endif %}">
+                                {% if user.is_admin %}Admin{% else %}User{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ user.tasks|length }}</td>
+                        <td>
+                            {% set overdue = user.get_overdue_tasks_count() %}
+                            {% if overdue > 0 %}
+                            <span class="badge bg-danger">{{ overdue }}</span>
+                            {% else %}
+                            <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

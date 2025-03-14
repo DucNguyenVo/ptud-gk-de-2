@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Profile</h3>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center mb-4">
+            <div class="col-auto">
+                <div class="position-relative">
+                    <img src="{{ current_user.avatar }}" 
+                         alt="Avatar" 
+                         class="rounded-circle" 
+                         style="width: 100px; height: 100px; object-fit: cover;"
+                         onerror="this.src='https://ui-avatars.com/api/?name={{ current_user.username }}&size=100&background=random'">
+                    <div class="position-absolute bottom-0 end-0">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm rounded-circle" data-bs-toggle="dropdown">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <label class="dropdown-item" style="cursor: pointer;">
+                                        <i class="fas fa-upload"></i> Upload Avatar
+                                        <input type="file" 
+                                               name="avatar"
+                                               class="d-none" 
+                                               id="avatar-upload" 
+                                               accept="image/*">
+                                    </label>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('main.generate_avatar') }}">
+                                        <i class="fas fa-random"></i> Tạo Avatar
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <h4 class="mb-1">{{ current_user.username }}</h4>
+                <p class="text-muted mb-0">{{ current_user.email }}</p>
+                <span class="badge {% if current_user.is_admin %}bg-danger{% else %}bg-primary{% endif %}">
+                    {% if current_user.is_admin %}Admin{% else %}User{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-line"></i> Task Statistics
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded text-center">
+                            <h3 class="mb-1">{{ current_user.tasks|length }}</h3>
+                            <small class="text-muted">Tổng số task</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded text-center {% if current_user.get_overdue_tasks_count() > 0 %}border-danger text-danger{% endif %}">
+                            <h3 class="mb-1">{{ current_user.get_overdue_tasks_count() }}</h3>
+                            <small class="{% if current_user.get_overdue_tasks_count() > 0 %}text-danger{% else %}text-muted{% endif %}">
+                                Task trễ hạn
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('avatar-upload').onchange = function() {
+    const formData = new FormData();
+    formData.append('avatar', this.files[0]);
+    
+    fetch('{{ url_for("main.update_avatar") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi upload avatar');
+    });
+};
+</script>
+{% endblock %} 

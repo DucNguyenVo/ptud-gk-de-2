@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Tasks</h2>
+    <a href="{{ url_for('main.new_task') }}" class="btn btn-primary">New Task</a>
+</div>
+
+{% if overdue_count > 0 %}
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    Bạn có {{ overdue_count }} công việc đang trễ hạn!
+</div>
+{% endif %}
+
+<div class="tasks">
+    {% for task in tasks %}
+    <div class="card mb-3 {% if task.is_overdue() %}border-danger{% endif %}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    {% if task.description %}
+                    <p class="card-text text-muted">{{ task.description }}</p>
+                    {% endif %}
+                    <div class="small text-muted">
+                        <div><strong>Ngày tạo:</strong> {{ task.created.strftime('%d/%m/%Y %H:%M') }}</div>
+                        {% if task.due_date %}
+                        <div><strong>Hạn chót:</strong> {{ task.due_date.strftime('%d/%m/%Y %H:%M') }}</div>
+                        {% endif %}
+                        {% if task.finished %}
+                        <div><strong>Hoàn thành:</strong> {{ task.finished.strftime('%d/%m/%Y %H:%M') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="ms-3">
+                    <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'pending' and task.is_overdue() %}bg-danger{% elif task.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        {% if task.status == 'completed' %}
+                            Đã hoàn thành
+                        {% elif task.status == 'pending' and task.is_overdue() %}
+                            Trễ hạn
+                        {% elif task.status == 'pending' %}
+                            Đang thực hiện
+                        {% else %}
+                            {{ task.status }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            {% if task.status != 'completed' %}
+            <div class="mt-3">
+                <a href="{{ url_for('main.complete_task', task_id=task.id) }}" 
+                   class="btn btn-success btn-sm">
+                    <i class="fas fa-check"></i> Hoàn thành
+                </a>
+                <a href="{{ url_for('main.delete_task', task_id=task.id) }}" 
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Bạn có chắc chắn muốn xóa công việc này?')">
+                    <i class="fas fa-trash"></i> Xóa
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Chưa có công việc nào. Hãy tạo công việc mới để bắt đầu!
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Thêm Font Awesome cho các biểu tượng -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 
